@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include",
+                "/usr/include/c++/$(gcc -dumpversion)",
+                "/usr/include/c++/$(gcc -dumpversion)/x86_64-redhat-linux"
+            ],
+            "defines": [],
+            "cppStandard": "c++11",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
