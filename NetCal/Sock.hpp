@@ -11,7 +11,7 @@
 
 class Sock{
 public:
-    int sock()
+    int Socket()
     {
         int sockfd = socket(AF_INET,SOCK_STREAM,0);
         if(sockfd < 0)
@@ -20,7 +20,7 @@ public:
             exit(-1);
         }
     }
-    void bindSock(int sockfd,const std::string& ip,uint16_t port)
+    void Bind(int sockfd,const std::string& ip,uint16_t port)
     {
         struct sockaddr_in addr; 
         memset(&addr,0,sizeof addr);
@@ -34,7 +34,7 @@ public:
             exit(-1);
         }
     }
-    void listenSock(int sockfd)
+    void Listen(int sockfd)
     {  
         if(listen(sockfd,BACKLOG) < 0)
         {
@@ -43,7 +43,7 @@ public:
             exit(-1);
         }
     }
-    int acceptSock(int sockfd,std::string* ip,uint16_t* port)
+    int Accept(int sockfd,std::string* ip,uint16_t* port)
     {
         struct sockaddr_in addr;
         memset(&addr,0,sizeof addr);
@@ -63,5 +63,20 @@ public:
             *port = ntohs(addr.sin_port);
         }
         return ret;      
+    }
+    bool Connect(int sockfd,const std::string& ip,uint16_t port)
+    {
+        struct sockaddr_in server_addr;
+        memset(&server_addr,0,sizeof server_addr);
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(port);
+        server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+        if(connect(sockfd,(struct sockaddr*)&server_addr,sizeof server_addr) < 0)
+        {
+            logMessage(ERROR,"connect");
+            return false;
+        }
+        return true;
+
     }
 };

@@ -6,20 +6,20 @@
 #include <iostream>
 
 
-using func = std::function<void(int)>;
+using func_t = std::function<void(int)>;
 
 namespace NetCal
 {
     class Data
     {
     public:
-        Data(int sockfd,std::vector<func>& funcs)
+        Data(int sockfd,std::vector<func_t>& funcs)
         :sockfd_(sockfd),
         funcs_(funcs)
         {}
     public:
         int sockfd_;
-        std::vector<func>& funcs_;
+        std::vector<func_t>& funcs_;
         pthread_t pid_;
     };
 
@@ -42,9 +42,9 @@ namespace NetCal
         :listen_sock_(-1),
         port_(port)
         {
-            listen_sock_ = sock_.sock();
-            sock_.bindSock(listen_sock_,ip,port);
-            sock_.listenSock(listen_sock_);
+            listen_sock_ = sock_.Socket();
+            sock_.Bind(listen_sock_,ip,port);
+            sock_.Listen(listen_sock_);
         }
         ~TcpServer()
         {
@@ -56,7 +56,7 @@ namespace NetCal
             {
                 std::string client_ip;
                 uint16_t client_port;
-                int sockfd = sock_.acceptSock(listen_sock_,&client_ip,&client_port);
+                int sockfd = sock_.Accept(listen_sock_,&client_ip,&client_port);
                 if(sockfd < 0)
                     continue;
                 std::cout << "client ip:" << client_ip << ",client port:" << client_port << std::endl;
@@ -64,7 +64,7 @@ namespace NetCal
                 pthread_create(&dt->pid_,nullptr,Run,dt);
             }
         }
-        void pushTask(func f)
+        void pushTask(func_t f)
         {
             if(f == nullptr)
                 return;
@@ -74,6 +74,6 @@ namespace NetCal
         Sock sock_;
         int listen_sock_;
         uint16_t port_;
-        std::vector<func> funcs_;
+        std::vector<func_t> funcs_;
     };
 }
