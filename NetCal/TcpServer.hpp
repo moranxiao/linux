@@ -4,34 +4,35 @@
 #include <vector>
 #include <pthread.h>
 #include <iostream>
+#include <sys/types.h>
 
 
-using func_t = std::function<void(int)>;
 
 namespace NetCal
 {
+    using func_t = std::function<void(int)>;
+    class TcpServer;
+
     class Data
     {
     public:
-        Data(int sockfd,std::vector<func_t>& funcs)
+        Data(int sockfd,TcpServer* server)
         :sockfd_(sockfd),
-        funcs_(funcs)
+        server_(server)
         {}
     public:
         int sockfd_;
-        std::vector<func_t>& funcs_;
-        pthread_t pid_;
+        TcpServer* server_;
     };
 
     class TcpServer
     {
     private:
-        static void* Run(void* args)
+        static void* Execute(void* args)
         {
             Data* pdt = (Data*)args;
-
-            pthread_detach(pdt->pid_);
-            for(auto& f : pdt->funcs_)
+            pthread_detach(pthread_self());
+            for(auto& f : pdt->server_->funcs_)
             {
                 f(pdt->sockfd_);
             }
@@ -39,8 +40,7 @@ namespace NetCal
         }
     public:
         TcpServer(uint16_t port,const std::string& ip = "0.0.0.0")
-        :listen_sock_(-1),
-        port_(port)
+        :listen_sock_(-1)
         {
             listen_sock_ = sock_.Socket();
             sock_.Bind(listen_sock_,ip,port);
@@ -60,11 +60,12 @@ namespace NetCal
                 if(sockfd < 0)
                     continue;
                 std::cout << "client ip:" << client_ip << ",client port:" << client_port << std::endl;
-                Data*dt = new Data(sockfd,funcs_);
-                pthread_create(&dt->pid_,nullptr,Run,dt);
+                Data*dt = new Data(sockfd,this);
+                pthread_t tid;
+                pthread_create(&tid,nullptr,Execute,dt);
             }
         }
-        void pushTask(func_t f)
+        void BindServe(func_t f)
         {
             if(f == nullptr)
                 return;
@@ -73,7 +74,6 @@ namespace NetCal
     private:
         Sock sock_;
         int listen_sock_;
-        uint16_t port_;
         std::vector<func_t> funcs_;
     };
 }

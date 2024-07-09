@@ -1,3 +1,4 @@
+#pragma once
 #include "Log.hpp"
 #include <sys/socket.h>
 #include <string>
@@ -7,9 +8,10 @@
 #include <cstring>
 
 
-#define BACKLOG 10
 
 class Sock{
+private:
+    const static int gbacklog = 20;
 public:
     int Socket()
     {
@@ -36,7 +38,7 @@ public:
     }
     void Listen(int sockfd)
     {  
-        if(listen(sockfd,BACKLOG) < 0)
+        if(listen(sockfd,gbacklog) < 0)
         {
             logMessage(ERROR,"listen");
             close(sockfd);
@@ -77,6 +79,6 @@ public:
             return false;
         }
         return true;
-
     }
+
 };

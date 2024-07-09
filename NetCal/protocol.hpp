@@ -1,9 +1,22 @@
+#pragma once
+
 #include <string>
 #include <iostream>
 #include "Log.hpp"
+#include <cstring>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #define SPACE " "
 #define SPACE_LEN 1
+
+#define SEP  "\r\n"
+#define SEP_LEN  strlen(SEP)
+
+#define MYSELF 1
+
+
+
 
 namespace NetCal
 {
@@ -36,7 +49,7 @@ namespace NetCal
             return true;
         }
 
-    private:
+    public:
         int code_;
         int result_;
     };
@@ -50,6 +63,7 @@ namespace NetCal
         Request() {}
         std::string Serialize()
         {
+#ifdef MYSELF
             std::string str;
             str += std::to_string(x_);
             str += SPACE;
@@ -57,9 +71,15 @@ namespace NetCal
             str += SPACE;
             str += std::to_string(y_);
             return str;
+#else
+
+            
+#endif       
         }
         bool DeSerialize(const std::string &str)
         {
+#ifdef MYSELF
+
             size_t pos1 = str.find(SPACE);
             if (pos1 == std::string::npos)
             {
@@ -76,6 +96,10 @@ namespace NetCal
             op_ = str[pos1 + SPACE_LEN];
             y_ = atoi(str.substr(pos2 + SPACE_LEN).c_str());
             return true;
+#else 
+
+            
+#endif       
         }
         Response Execute()
         {
@@ -119,11 +143,58 @@ namespace NetCal
             return Response(code,result);
         }
 
-    private:
+    public:
         int x_;
         int y_;
         char op_;
     };
 
 
+}
+
+//定制传输控制协议 "LEN\r\n******\r\n"
+std::string EnCode(const std::string& str)
+{   
+    std::string res;
+    res += std::to_string(str.length());
+    res += SEP;
+    res += str;
+    res += SEP;
+    return res;
+}
+
+std::string DeCode(std::string& str) //此处str代表tcp传输的字节流数据，不一定是完整报文
+{
+    size_t pos = str.find(SEP);
+    if(pos == std::string::npos)
+        return "";
+    int len = atoi(str.substr(0,pos).c_str());
+    if(len > str.length() - SEP_LEN * 2 - pos)
+    {
+        return "";
+    }
+    std::string res = str.substr(pos+SEP_LEN,len);
+    str.erase(0,pos+SEP_LEN*2+len);
+    return res;
+}
+void Send(int sock, const std::string str)
+{
+    ssize_t n = send(sock,str.c_str(),str.size(),0);
+    if(n < 0)
+        std::cout << "Send Error" << std::endl;    
+}
+bool Recv(int sock,std::string* s)
+{
+    if(s == nullptr)  return false;
+    char buffer[1024];
+    ssize_t sz = recv(sock,buffer,sizeof(buffer)-1,0);
+    //这个判断是必要的，当客户端关闭时，read\recv会返回0,如果此时依旧往下走，还往此文件描述符里write的话
+    //系统会发送SIGPIPE信号，关闭进程
+    //但是只判断也会有问题，当正在发送的时候，客户端关闭，还是会有SIGPIPE信号
+    //一般经验：将SIGPIPE信号忽略，防止运行中出现非法写入的问题
+    if(sz <= 0)
+        return false;
+    buffer[sz] = 0;
+    *s += buffer;
+    return true;
 }
