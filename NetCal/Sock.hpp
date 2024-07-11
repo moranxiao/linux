@@ -48,7 +48,7 @@ public:
     {
         struct sockaddr_in addr;
         memset(&addr,0,sizeof addr);
-        socklen_t len;
+        socklen_t len = sizeof(addr);
         int servicesock = accept(sockfd,(struct sockaddr*)&addr,&len);
         if(servicesock < 0)
         {
