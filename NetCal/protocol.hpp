@@ -6,6 +6,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <jsoncpp/json/json.h>
 
 #define SPACE " "
 #define SPACE_LEN 1
@@ -13,7 +14,7 @@
 #define SEP  "\r\n"
 #define SEP_LEN  strlen(SEP)
 
-#define MYSELF 1
+// #define MYSELF 1
 
 
 
@@ -30,14 +31,23 @@ namespace NetCal
         Response() {}
         std::string Serialize()
         {
+#ifdef MYSELF
             std::string str;
             str += std::to_string(code_);
             str += SPACE;
             str += std::to_string(result_);
             return str;
+#else
+            Json::Value root;
+            root["code"] = code_;
+            root["result"] = result_;
+            Json::FastWriter writer;
+            return writer.write(root);
+#endif
         }
         bool DeSerialize(const std::string &str)
         {
+#ifdef  MYSELF
             size_t pos = str.find(SPACE);
             if (pos == std::string::npos)
             {
@@ -47,6 +57,14 @@ namespace NetCal
             code_ = atoi(str.substr(0, pos).c_str());
             result_ = atoi(str.substr(pos + SPACE_LEN).c_str());
             return true;
+#else
+            Json::Value root;
+            Json::Reader reader;
+            if(!reader.parse(str,root)) return false;
+            code_ = root["code"].asInt();
+            result_ = root["result"].asInt();
+            return true;
+#endif
         }
 
     public:
@@ -72,7 +90,12 @@ namespace NetCal
             str += std::to_string(y_);
             return str;
 #else
-
+            Json::Value root;
+            root["x"] = x_;
+            root["y"] = y_;
+            root["op"] = op_;
+            Json::FastWriter writer;
+            return writer.write(root);
             
 #endif       
         }
@@ -97,7 +120,12 @@ namespace NetCal
             y_ = atoi(str.substr(pos2 + SPACE_LEN).c_str());
             return true;
 #else 
-
+            Json::Value root;
+            Json::Reader reader;
+            reader.parse(str,root);
+            x_ = root["x"].asInt();
+            y_ = root["y"].asInt();
+            op_ = root["op"].asInt();
             
 #endif       
         }

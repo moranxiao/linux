@@ -22,6 +22,7 @@ void run(int sockfd)
         std::cin  >> x >> op >> y;
         Request req(x,y,op);
         std::string s = req.Serialize();
+        std::cout << s << std::endl;
         std::string send_package = EnCode(s);
         Send(sockfd,send_package);
         Response resp;
