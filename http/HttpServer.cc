@@ -44,14 +44,21 @@ void HanderHttpRequest(int sockfd)
         }
         in.close();
     }
-
-    std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+    std::string httpResponse;
+    if(content.empty())
+    {
+        httpResponse = "HTTP/1.1 302 Found\r\n";
+        httpResponse += "Location: http://1.94.136.155:8080/404.html\r\n";
+    } 
+    else
+    {
+        httpResponse = "HTTP/1.1 200 OK\r\n";
+        httpResponse += (std::string)"Set-cookie:" + "这是一个测试cookie" + "\r\n";
+    }
     httpResponse += "\r\n";
     httpResponse += content;
     
     send(sockfd,httpResponse.c_str(),httpResponse.size(),0);
-
-
 }
 
 int main(int argc,char* argv[])
