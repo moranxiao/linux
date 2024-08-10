@@ -3,6 +3,7 @@
 #define SELECT
 #include <sys/select.h>
 #include "Sock.hpp"
+#include <iostream>
 
 #define BITS 8
 #define NUM (sizeof(fd_set)*BITS)
@@ -75,7 +76,15 @@ private:
             buffer[n] = 0;
             logMessage(DEBUG,"MESSAGE[%d]:%s", _fd_array, buffer);
         }
-
+    }
+    void DebugPrint()
+    {
+        for(int i = 0; i < NUM; i++)
+        {
+            if(~_fd_array[i])
+                std::cout << _fd_array[i] << " ";
+        }    
+        std::cout << std::endl;
     }
 public:
     SelectServer(uint16_t port = 8080)
@@ -94,6 +103,7 @@ public:
     {
         while(true)
         {
+            DebugPrint();
             timeval timeout = {3,0};
             fd_set fds;
             FD_ZERO(&fds);
@@ -119,6 +129,7 @@ public:
             }
         }
     }
+
     ~SelectServer()
     {
         if(_listensock >= 0)
