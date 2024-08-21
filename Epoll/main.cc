@@ -1,18 +1,9 @@
-#include <iostream>
+#include <memory>
+#include "EpollServer.hpp"
 
-class A{
-private:
-    static const int a;
-public:
-    A(const int& b = a)
-    :_a(b)
-    {}
-private:
-    int _a;
-};
-const int A::a = 10;
 int main()
 {
-    A a;
+    std::unique_ptr<EpollServer> server(new EpollServer);
+    server->Dispatcher();
     return 0;
 }
