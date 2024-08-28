@@ -49,12 +49,12 @@ public:
         struct sockaddr_in addr;
         memset(&addr,0,sizeof addr);
         socklen_t len = sizeof(addr);
-        *accept_errno = 0;      
+        if(!accept_errno) *accept_errno = 0;      
         int servicesock = accept(sockfd,(struct sockaddr*)&addr,&len);
         if(servicesock < 0)
         {
             logMessage(WARING,"accept");
-            *accept_errno = errno;
+            if(!accept_errno) *accept_errno = errno;
             return -1;
         }
         if(ip != nullptr)
