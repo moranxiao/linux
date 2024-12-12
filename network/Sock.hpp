@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <string>
+#include <fcntl.h>
 
 class Sock{
     static const int gbacklog = 15;
@@ -64,6 +65,13 @@ public:
         server.sin_port = htons(server_port);
         if(connect(sock,(struct sockaddr*)&server,sizeof(server)))
             exit(4);
+    }
+    static bool SetNonBlock(int sock)
+    {
+        int fl = fcntl(sock,F_GETFL);
+        if(fl < 0) return false;
+        if(!fcntl(sock,F_SETFL, fl | O_NONBLOCK)) return true;
+        return false;
     }
     //size_t 是 unsigned int
     //ssize_t 就是 int

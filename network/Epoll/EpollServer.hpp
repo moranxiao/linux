@@ -99,6 +99,7 @@ public:
     ~EpollServer()
     {
         if(_listenSock >= 0) close(_listenSock);
+        if(_revts) delete[] _revts;
     }
 private:
     std::string _ip;
