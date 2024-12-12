@@ -58,6 +58,7 @@ public:
     ~PollServer()
     {
         if(_listenSock >= 0) close(_listenSock);
+        if(_fds) delete(_fds);
     }
 private:
     void HandleReadEvent()
