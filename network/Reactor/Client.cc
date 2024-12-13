@@ -13,9 +13,8 @@ int main()
         std::string buffer = req.Serialize();
         std::string outbuffer = std::to_string(buffer.size()) + "||" + buffer;
         int n = write(sock,outbuffer.c_str(),outbuffer.size());
-        
         char inbuffer[10240];
-        n = read(sock,inbuffer,sizeof(buffer)-1);
+        n = read(sock,inbuffer,sizeof(inbuffer)-1);
         inbuffer[n] = 0;
         std::cout << inbuffer << std::endl;
     }
