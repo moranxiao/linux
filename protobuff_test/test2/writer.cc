@@ -7,28 +7,28 @@ using namespace std;
 
 void AddContactPeople(contacts::PeopleInfo* people)
 {
+    cout << "------------------------添加联系人------------------------" << endl;
     if(!people) return;
     string name;
     int age;
-    cin.ignore(256,'\n');
     cout << "请输入name:>";
     getline(cin,name);
+    people->set_name(name);
     cout << "请输入age>:";
     cin >> age;
+    people->set_age(age);
     cin.ignore(256,'\n');
 
     for(int i = 0;;i++)
     {
+        cout << "请输入telephone[" << i+1 <<  "]>:";
+        string phone_num;
+        getline(cin, phone_num);
+        if(phone_num.empty()) break;
         contacts::PeopleInfo_Phone* phone = people->add_phone();
-        for(int j = 0; ; j++)
-        {
-            cout << "请输入telephone>:";
-            string phone_num;
-            getline(cin, phone_num);
-            if(phone_num.empty()) break;
-            phone->set_phone_number(phone_num);
-        }
+        phone->set_phone_number(phone_num);
     }
+    cout << "------------------------添加完成------------------------" << endl;
 }
 
 int main()
@@ -44,6 +44,7 @@ int main()
         cerr << "contacts.bin文件解析错误" << endl;
         input.close();
     }
+
     AddContactPeople(contacts.add_people());
     
     fstream output("contacts.bin",ios::out | ios::trunc | ios::binary);
