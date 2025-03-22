@@ -2,15 +2,37 @@
 syntax = "proto3";
 package contacts;
 
+import "google/protobuf/any.proto";
+
+enum PhoneType{
+    MP = 0;
+    TEL = 1;
+}
+
+
+
 message PeopleInfo{
     string name = 1;
     int32 age = 2;
 
     message Phone{
         string phone_number = 1;
+        PhoneType phone_type = 2;
     }
     
     repeated Phone phone = 3;
+    message Address{
+        string work = 1;
+        string home = 2;
+    }
+    google.protobuf.Any data = 4;
+
+    oneof other_contact {
+        string wx = 5;
+        string qq = 6;
+    }
+
+    map<string,string> remark = 7;
 }
 
 message Contacts{

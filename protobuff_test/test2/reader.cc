@@ -14,8 +14,34 @@ void ShowContacts(const contacts::Contacts& contacts)
         cout << "年龄："  << contacts.people(i).age() << endl;
         for(int j = 0; j < contacts.people(i).phone_size(); j++)
         {
-            cout << "电话号码[" << j+1 << "]:" << contacts.people(i).phone(j).phone_number() << endl;
+            cout << "电话号码[" << j+1 << "]:" << contacts.people(i).phone(j).phone_number();
+            cout << "\t(" << contacts::PhoneType_Name(contacts.people(i).phone(j).phone_type()) << ")\n"; 
         }
+        
+        if(contacts.people(i).data().Is<contacts::PeopleInfo_Address>())
+        {
+            contacts::PeopleInfo_Address addr;
+            contacts.people(i).data().UnpackTo(&addr);
+            cout << "家庭住址:" << addr.home() << endl;
+            cout << "工作地址:" << addr.work() << endl; 
+        }
+
+        switch(contacts.people(i).other_contact_case())
+        {
+            case contacts::PeopleInfo::OtherContactCase::kQq:
+            cout << "QQ:" << contacts.people(i).qq() << endl;
+            break;
+            case contacts::PeopleInfo::OtherContactCase::kWx:
+            cout << "WX:" << contacts.people(i).wx() << endl;
+            break;
+        }
+
+        for(auto& it : contacts.people(i).remark())
+        {
+            cout << "标题:" << it.first << endl;
+            cout << "内容:" << it.second << endl;
+        }
+
     }
 }
 
